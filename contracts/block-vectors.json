@@ -1,0 +1,492 @@
+{
+ "_comment": "Shared contract vectors: backend/tests/unit/test_block_vectors.py and web/src/schemas/blockVectors.test.ts must agree on every case.",
+ "schema_version": "2.0",
+ "vectors": [
+  {
+   "name": "heading",
+   "valid": true,
+   "block": {
+    "id": "blk-000",
+    "type": "heading",
+    "level": 2,
+    "text": "Overview"
+   }
+  },
+  {
+   "name": "heading level 9",
+   "valid": false,
+   "block": {
+    "id": "blk-001",
+    "type": "heading",
+    "level": 9,
+    "text": "x"
+   }
+  },
+  {
+   "name": "heading empty",
+   "valid": false,
+   "block": {
+    "id": "blk-002",
+    "type": "heading",
+    "level": 2,
+    "text": ""
+   }
+  },
+  {
+   "name": "text",
+   "valid": true,
+   "block": {
+    "id": "blk-003",
+    "type": "text",
+    "markdown": "Plain **markdown** and `code`."
+   }
+  },
+  {
+   "name": "text empty",
+   "valid": false,
+   "block": {
+    "id": "blk-004",
+    "type": "text",
+    "markdown": ""
+   }
+  },
+  {
+   "name": "text script",
+   "valid": false,
+   "block": {
+    "id": "blk-005",
+    "type": "text",
+    "markdown": "<script>alert(1)</script>"
+   }
+  },
+  {
+   "name": "text img onerror",
+   "valid": false,
+   "block": {
+    "id": "blk-006",
+    "type": "text",
+    "markdown": "<img src=x onerror=alert(1)>"
+   }
+  },
+  {
+   "name": "text js link",
+   "valid": false,
+   "block": {
+    "id": "blk-007",
+    "type": "text",
+    "markdown": "[x](javascript:alert(1))"
+   }
+  },
+  {
+   "name": "list",
+   "valid": true,
+   "block": {
+    "id": "blk-008",
+    "type": "list",
+    "ordered": true,
+    "items": [
+     "one",
+     "two"
+    ]
+   }
+  },
+  {
+   "name": "list empty",
+   "valid": false,
+   "block": {
+    "id": "blk-009",
+    "type": "list",
+    "ordered": false,
+    "items": []
+   }
+  },
+  {
+   "name": "list blank item",
+   "valid": false,
+   "block": {
+    "id": "blk-010",
+    "type": "list",
+    "ordered": false,
+    "items": [
+     " "
+    ]
+   }
+  },
+  {
+   "name": "list unsafe item",
+   "valid": false,
+   "block": {
+    "id": "blk-011",
+    "type": "list",
+    "ordered": false,
+    "items": [
+     "ok",
+     "<iframe src=x>"
+    ]
+   }
+  },
+  {
+   "name": "table",
+   "valid": true,
+   "block": {
+    "id": "blk-012",
+    "type": "table",
+    "headers": [
+     "a",
+     "b"
+    ],
+    "rows": [
+     [
+      "1",
+      "2"
+     ]
+    ],
+    "caption": "c"
+   }
+  },
+  {
+   "name": "table ragged",
+   "valid": false,
+   "block": {
+    "id": "blk-013",
+    "type": "table",
+    "headers": [
+     "a",
+     "b"
+    ],
+    "rows": [
+     [
+      "1"
+     ]
+    ]
+   }
+  },
+  {
+   "name": "callout",
+   "valid": true,
+   "block": {
+    "id": "blk-014",
+    "type": "callout",
+    "variant": "warning",
+    "text": "Careful."
+   }
+  },
+  {
+   "name": "callout variant",
+   "valid": false,
+   "block": {
+    "id": "blk-015",
+    "type": "callout",
+    "variant": "loud",
+    "text": "x"
+   }
+  },
+  {
+   "name": "mermaid",
+   "valid": true,
+   "block": {
+    "id": "blk-016",
+    "type": "mermaid",
+    "source": "flowchart TD\n A[Start] --> B[End]"
+   }
+  },
+  {
+   "name": "mermaid not a diagram",
+   "valid": false,
+   "block": {
+    "id": "blk-017",
+    "type": "mermaid",
+    "source": "not a diagram"
+   }
+  },
+  {
+   "name": "math",
+   "valid": true,
+   "block": {
+    "id": "blk-018",
+    "type": "math",
+    "latex": "\\frac{a}{b}",
+    "display": true,
+    "variables": [
+     {
+      "symbol": "a",
+      "meaning": "numerator"
+     }
+    ]
+   }
+  },
+  {
+   "name": "math href",
+   "valid": false,
+   "block": {
+    "id": "blk-019",
+    "type": "math",
+    "latex": "\\href{javascript:alert(1)}{x}"
+   }
+  },
+  {
+   "name": "math def",
+   "valid": false,
+   "block": {
+    "id": "blk-020",
+    "type": "math",
+    "latex": "\\def\\a{b}\\a"
+   }
+  },
+  {
+   "name": "chart",
+   "valid": true,
+   "block": {
+    "id": "blk-021",
+    "type": "chart",
+    "chart_type": "bar",
+    "categories": [
+     "a",
+     "b"
+    ],
+    "series": [
+     {
+      "name": "s",
+      "data": [
+       1,
+       2
+      ]
+     }
+    ],
+    "source": "benchmark"
+   }
+  },
+  {
+   "name": "chart misaligned",
+   "valid": false,
+   "block": {
+    "id": "blk-022",
+    "type": "chart",
+    "chart_type": "bar",
+    "categories": [
+     "a",
+     "b"
+    ],
+    "series": [
+     {
+      "name": "s",
+      "data": [
+       1
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "chart one category",
+   "valid": false,
+   "block": {
+    "id": "blk-023",
+    "type": "chart",
+    "chart_type": "bar",
+    "categories": [
+     "a"
+    ],
+    "series": [
+     {
+      "name": "s",
+      "data": [
+       1
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "name": "image",
+   "valid": true,
+   "block": {
+    "id": "blk-024",
+    "type": "image",
+    "url": "https://example.com/a.png",
+    "alt": "A diagram of the flow"
+   }
+  },
+  {
+   "name": "image http",
+   "valid": false,
+   "block": {
+    "id": "blk-025",
+    "type": "image",
+    "url": "http://example.com/a.png",
+    "alt": "A diagram of the flow"
+   }
+  },
+  {
+   "name": "image credentials",
+   "valid": false,
+   "block": {
+    "id": "blk-026",
+    "type": "image",
+    "url": "https://u:p@example.com/a.png",
+    "alt": "A diagram of the flow"
+   }
+  },
+  {
+   "name": "image short alt",
+   "valid": false,
+   "block": {
+    "id": "blk-027",
+    "type": "image",
+    "url": "https://example.com/a.png",
+    "alt": "x"
+   }
+  },
+  {
+   "name": "code with markup",
+   "valid": true,
+   "block": {
+    "id": "blk-028",
+    "type": "code",
+    "language": "python",
+    "code": "print('<b>ok</b>')"
+   }
+  },
+  {
+   "name": "code language",
+   "valid": false,
+   "block": {
+    "id": "blk-029",
+    "type": "code",
+    "language": "py thon",
+    "code": "x"
+   }
+  },
+  {
+   "name": "algorithm",
+   "valid": true,
+   "block": {
+    "id": "blk-030",
+    "type": "algorithm",
+    "name": "Binary search",
+    "steps": [
+     "pick mid",
+     "compare"
+    ],
+    "time_complexity": "O(log n)"
+   }
+  },
+  {
+   "name": "algorithm no steps",
+   "valid": false,
+   "block": {
+    "id": "blk-031",
+    "type": "algorithm",
+    "name": "x",
+    "steps": []
+   }
+  },
+  {
+   "name": "quiz",
+   "valid": true,
+   "block": {
+    "id": "blk-032",
+    "type": "quiz",
+    "question_ids": [
+     "q1"
+    ]
+   }
+  },
+  {
+   "name": "quiz empty",
+   "valid": false,
+   "block": {
+    "id": "blk-033",
+    "type": "quiz",
+    "question_ids": []
+   }
+  },
+  {
+   "name": "flashcard",
+   "valid": true,
+   "block": {
+    "id": "blk-034",
+    "type": "flashcard",
+    "front": "Q?",
+    "back": "A."
+   }
+  },
+  {
+   "name": "flashcard empty back",
+   "valid": false,
+   "block": {
+    "id": "blk-035",
+    "type": "flashcard",
+    "front": "Q?",
+    "back": ""
+   }
+  },
+  {
+   "name": "exercise",
+   "valid": true,
+   "block": {
+    "id": "blk-036",
+    "type": "exercise",
+    "prompt": "Do it",
+    "hints": [
+     "h"
+    ],
+    "difficulty": 3
+   }
+  },
+  {
+   "name": "exercise difficulty",
+   "valid": false,
+   "block": {
+    "id": "blk-037",
+    "type": "exercise",
+    "prompt": "Do it",
+    "difficulty": 9
+   }
+  },
+  {
+   "name": "citation",
+   "valid": true,
+   "block": {
+    "id": "blk-038",
+    "type": "citation",
+    "label": "[1]",
+    "source_title": "Docs",
+    "url": "https://docs.python.org/3/",
+    "quote": "short quote"
+   }
+  },
+  {
+   "name": "citation js url",
+   "valid": false,
+   "block": {
+    "id": "blk-039",
+    "type": "citation",
+    "label": "[1]",
+    "source_title": "Docs",
+    "url": "javascript:alert(1)"
+   }
+  },
+  {
+   "name": "citation long quote",
+   "valid": false,
+   "block": {
+    "id": "blk-040",
+    "type": "citation",
+    "label": "[1]",
+    "source_title": "Docs",
+    "url": "https://docs.python.org/3/",
+    "quote": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+   }
+  },
+  {
+   "name": "unknown type",
+   "valid": false,
+   "block": {
+    "id": "blk-041",
+    "type": "video",
+    "url": "https://example.com/v"
+   }
+  }
+ ]
+}

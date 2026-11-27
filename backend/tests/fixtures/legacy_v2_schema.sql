@@ -1,0 +1,24 @@
+-- The pre-Alembic SQLite schema (PRAGMA user_version = 2), used to prove existing databases are adopted without data loss.
+CREATE TABLE users (id TEXT PRIMARY KEY, name TEXT NOT NULL CHECK (length(name) BETWEEN 2 AND 80), email TEXT NOT NULL UNIQUE, password_hash TEXT NOT NULL, created_at TEXT NOT NULL);
+CREATE TABLE learning_history (id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, topic TEXT NOT NULL CHECK (length(topic) BETWEEN 1 AND 120), score INTEGER NOT NULL CHECK (score BETWEEN 0 AND 10), level TEXT NOT NULL CHECK (level IN ('Beginner','Intermediate','Expert')), created_at TEXT NOT NULL);
+CREATE INDEX idx_history_user ON learning_history(user_id, created_at DESC);
+CREATE TABLE skills (skill_id TEXT PRIMARY KEY, slug TEXT NOT NULL UNIQUE, name TEXT NOT NULL, description TEXT NOT NULL DEFAULT '', category TEXT NOT NULL DEFAULT 'general', domain TEXT NOT NULL DEFAULT 'software', difficulty INTEGER NOT NULL DEFAULT 2 CHECK (difficulty BETWEEN 1 AND 5), estimated_hours REAL NOT NULL DEFAULT 10 CHECK (estimated_hours > 0), aliases TEXT NOT NULL DEFAULT '[]', parent_skill_id TEXT REFERENCES skills(skill_id) ON DELETE SET NULL, status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','deprecated','proposed')), created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+CREATE INDEX idx_skills_category ON skills(category, status);
+CREATE TABLE skill_dependencies (skill_id TEXT NOT NULL REFERENCES skills(skill_id) ON DELETE CASCADE, prerequisite_id TEXT NOT NULL REFERENCES skills(skill_id) ON DELETE CASCADE, min_proficiency REAL NOT NULL DEFAULT 2 CHECK (min_proficiency BETWEEN 0 AND 5), PRIMARY KEY (skill_id, prerequisite_id), CHECK (skill_id <> prerequisite_id));
+CREATE INDEX idx_deps_prereq ON skill_dependencies(prerequisite_id);
+CREATE TABLE skill_evidence (evidence_id INTEGER PRIMARY KEY AUTOINCREMENT, learner_id TEXT NOT NULL, skill_id TEXT NOT NULL REFERENCES skills(skill_id), kind TEXT NOT NULL, score REAL NOT NULL CHECK (score BETWEEN 0 AND 1), difficulty REAL NOT NULL CHECK (difficulty BETWEEN 0 AND 5), n_items INTEGER NOT NULL DEFAULT 1, source_id TEXT, occurred_at TEXT NOT NULL);
+CREATE INDEX idx_evidence_learner ON skill_evidence(learner_id, skill_id, occurred_at);
+CREATE UNIQUE INDEX uq_evidence_source ON skill_evidence(learner_id, skill_id, source_id, kind) WHERE source_id IS NOT NULL;
+CREATE TABLE proficiency_snapshots (snapshot_id INTEGER PRIMARY KEY AUTOINCREMENT, learner_id TEXT NOT NULL, skill_id TEXT NOT NULL, proficiency_score REAL NOT NULL, confidence_score REAL NOT NULL, evidence_count INTEGER NOT NULL, proficiency_version TEXT NOT NULL, last_assessed_at TEXT, snapshot_at TEXT NOT NULL);
+CREATE INDEX idx_snap ON proficiency_snapshots(learner_id, skill_id, snapshot_at);
+CREATE TABLE assessment_attempts (attempt_id TEXT PRIMARY KEY, learner_id TEXT NOT NULL, skill_id TEXT NOT NULL, question_ids TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','completed')), results TEXT NOT NULL DEFAULT '[]', started_at TEXT NOT NULL, completed_at TEXT);
+CREATE INDEX idx_attempts_learner ON assessment_attempts(learner_id, started_at);
+CREATE TABLE learning_paths (roadmap_id TEXT NOT NULL, version INTEGER NOT NULL, learner_id TEXT NOT NULL, body TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY (roadmap_id, version));
+CREATE INDEX idx_paths_learner ON learning_paths(learner_id);
+CREATE TABLE learning_goals (goal_id TEXT PRIMARY KEY, learner_id TEXT NOT NULL, role_slug TEXT NOT NULL, hours_per_week REAL NOT NULL, created_at TEXT NOT NULL);
+CREATE INDEX idx_goals_learner ON learning_goals(learner_id, created_at);
+CREATE TABLE tutor_conversations (conversation_id TEXT PRIMARY KEY, learner_id TEXT NOT NULL, title TEXT NOT NULL, skill_id TEXT, language TEXT NOT NULL DEFAULT 'en', created_at TEXT NOT NULL, updated_at TEXT NOT NULL);
+CREATE INDEX idx_conv_learner ON tutor_conversations(learner_id, updated_at DESC);
+CREATE TABLE tutor_messages (message_id INTEGER PRIMARY KEY AUTOINCREMENT, conversation_id TEXT NOT NULL REFERENCES tutor_conversations(conversation_id) ON DELETE CASCADE, role TEXT NOT NULL CHECK (role IN ('user','assistant')), content TEXT NOT NULL, created_at TEXT NOT NULL);
+CREATE INDEX idx_msgs_conv ON tutor_messages(conversation_id, message_id);
+PRAGMA user_version = 2;

@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <title>LearnAI — Personalized Learning & Career Intelligence</title>
+    <script>
+      // Light is the default; dark only if the user explicitly chose it. Runs before first paint (no flash).
+      try { document.documentElement.classList.toggle('dark', localStorage.getItem('learnai-theme') === 'dark'); } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/app/main.ts"></script>
+  </body>
+</html>
