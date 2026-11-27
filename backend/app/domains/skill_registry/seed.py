@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from app.core.exceptions import ConflictError
+from app.domains.skill_registry.repository import SnapshotSkillRepository
 from app.domains.skill_registry.service import SkillRegistry
 
 SKILLS = [
@@ -79,6 +80,7 @@ def _sync_aliases(registry: SkillRegistry) -> None:
 
 
 def seed(registry: SkillRegistry) -> None:
+    registry = SkillRegistry(SnapshotSkillRepository(registry.repo))   # an already seeded database costs two queries
     for name, cat, diff, hours, aliases in SKILLS:
         try:
             registry.create_skill(name, category=cat, difficulty=diff, estimated_hours=hours, aliases=aliases)

@@ -12,6 +12,7 @@ from app.domains.assessments.seed import seed_questions
 from app.domains.careers.service import CareerService
 from app.domains.resource_engine.service import ResourceService
 from app.domains.skill_intelligence.explorer import ExplorerService
+from app.domains.skill_registry.repository import SnapshotSkillRepository
 from app.domains.skill_registry.seed import seed
 from app.domains.skill_registry.service import SkillRegistry
 from app.infrastructure.cache.cache import Cache, InMemoryBackend
@@ -56,7 +57,7 @@ def get_container() -> Container:
                 db = get_database()
                 reg = SkillRegistry(SqlSkillRepository(db))
                 seed(reg)
-                qs = {q.question_id: q for q in seed_questions(reg)}
+                qs = {q.question_id: q for q in seed_questions(SkillRegistry(SnapshotSkillRepository(reg.repo)))}
                 ast_store = AssessmentStore(db)
                 seed_question_bank(ast_store, reg)  # idempotent; a single COUNT once seeded
                 careers, learner, hist = CareerService(reg), LearnerStore(db), ContentHistoryStore(db)

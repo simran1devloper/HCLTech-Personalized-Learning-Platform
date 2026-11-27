@@ -55,3 +55,33 @@ class InMemorySkillRepository:
 
     def remove_dependency(self, skill_id, prerequisite_id):
         self._deps.pop((skill_id, prerequisite_id), None)
+
+
+class SnapshotSkillRepository(InMemorySkillRepository):
+    """Reads from a copy loaded once, writes through to ``target``. For bulk work such as seeding, where a query per lookup makes startup take
+    minutes against a distant database. Short-lived: it does not see changes made elsewhere."""
+
+    def __init__(self, target: SkillRepository):
+        super().__init__()
+        self._target = target
+        self._skills = {s.skill_id: s for s in target.list(limit=100000)[0]}
+        self._deps = {(d.skill_id, d.prerequisite_id): d for d in target.list_dependencies()}
+
+    def add(self, skill):
+        self._target.add(skill)
+        return super().add(skill)
+
+    def update(self, skill):
+        self._target.update(skill)
+        return super().update(skill)
+
+    def add_dependency(self, dep):
+        if self._deps.get((dep.skill_id, dep.prerequisite_id)) == dep:
+            return                                  # already stored: nothing to write
+        self._target.add_dependency(dep)
+        super().add_dependency(dep)
+
+    def remove_dependency(self, skill_id, prerequisite_id):
+        self._target.remove_dependency(skill_id, prerequisite_id)
+        super().remove_dependency(skill_id, prerequisite_id)
+

@@ -1,6 +1,7 @@
 import type { ApiErrorBody } from '@/types/api'
 
-export const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000').replace(/\/$/, '')
+// Empty means same origin: Vercel rewrites (vercel.json) or the Vite proxy (vite.config.ts) forward API paths to the backend.
+export const API_BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
 export const TOKEN_KEY = 'learnai_token' // same keys as the legacy frontend so existing sessions keep working
 export const USER_KEY = 'learnai_user'
 

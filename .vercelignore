@@ -1,0 +1,30 @@
+# Keep secrets, local data and generated files out of Vercel uploads (the CLI uploads your working folder)
+.env
+.env.*
+*.env
+*.pem
+*.key
+.git
+.vercel
+
+# local databases and logs
+backend/data
+*.db
+*.db-*
+*.sqlite*
+*.bak
+*.bak-*
+*.log
+
+# not needed to build or run
+**/__pycache__
+**/.pytest_cache
+backend/.venv
+backend/tests
+backend/benchmarks
+web/node_modules
+web/dist
+web/dist-e2e
+web/.vitest
+web/test-results
+web/playwright-report

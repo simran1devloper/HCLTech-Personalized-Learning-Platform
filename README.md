@@ -151,7 +151,7 @@ python3 -c "import secrets; print(secrets.token_hex(32))"
 cd backend
 python3 -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
-pip install -r requirements.txt "sqlalchemy[asyncio]" alembic
+pip install -r requirements.txt
 mkdir -p data                      # holds the local SQLite database
 python -m uvicorn main:app --reload --port 8000
 ```
@@ -183,7 +183,18 @@ cd web
 npm run build                      # type check, then bundle into web/dist
 ```
 
-Serve `web/dist` with a static web server, and route unknown paths to `index.html`. Set `VITE_API_BASE_URL` before building if the API is not at `http://localhost:8000`, and add the web app's origin to `ALLOWED_ORIGINS` on the backend.
+Serve `web/dist` with a static web server, and route unknown paths to `index.html`. Route `/api/`, `/auth/` and `/learning/` to the backend. If the API is on a different origin instead, set `VITE_API_BASE_URL` before building and add the web app's origin to `ALLOWED_ORIGINS` on the backend.
+
+### Deploy to Vercel
+
+[vercel.json](vercel.json) deploys the web app and the API as two [services](https://vercel.com/docs/services) on one domain. The browser calls the API on the same origin, so no service bindings or `VITE_API_BASE_URL` are needed.
+
+1. Import the repository into Vercel with the root directory set to the repository root.
+2. Add the project environment variables: `ENVIRONMENT=production`, a new `SECRET_KEY`, `STORE_BACKEND=postgres`, `DB_BACKEND=sqlite`, `DATABASE_URL` (see [Supabase](#supabase)), `LLM_PROVIDERS`, the provider's API key and model, and `ALLOW_UNSIGNED_QUIZ=false`.
+3. Run `python scripts/check_supabase.py` from `backend/` once before the first deployment, so tables and seed data already exist.
+4. Deploy. To try the setup locally, run `vercel dev` from the repository root.
+
+The `regions` setting should match the database region (`icn1` is Seoul). On serverless hosting the cache and rate limits are per instance, and long or background generation can be cut off by function time limits.
 
 ---
 
@@ -223,7 +234,6 @@ Any non-local host, including a tunnel to your own machine, is treated as a remo
 
 ```bash
 docker compose -f docker-compose.dev.yml up -d
-pip install "psycopg[binary]"      # inside the backend virtual environment
 ```
 
 Then set the following in `.env`:
@@ -235,6 +245,29 @@ DATABASE_URL=postgresql+psycopg://learnai:learnai_dev_only@127.0.0.1:5433/learna
 
 These credentials are for **local development only**.
 
+### Supabase
+
+The app uses Supabase as a PostgreSQL database. It does not need the Supabase project URL or API keys for this.
+
+1. In the Supabase dashboard, open **Connect → Session pooler** and copy the connection string.
+2. Set the following in `.env`. Change the prefix to `postgresql+psycopg://` and URL-encode special characters in the password.
+
+   ```ini
+   DB_BACKEND=sqlite          # follows STORE_BACKEND
+   STORE_BACKEND=postgres
+   DATABASE_URL=postgresql+psycopg://postgres.<project-ref>:<password>@<pooler-host>:5432/postgres
+   ```
+
+3. Verify the setup from `backend/`:
+
+   ```bash
+   python scripts/check_supabase.py
+   ```
+
+   The check creates or upgrades the tables, confirms that Row Level Security is on, then registers, uses and removes a temporary user.
+
+Migrations enable Row Level Security on every application table without adding policies, so the publishable key cannot read them. Existing SQLite data is not copied to Supabase.
+
 ---
 
 ## Testing
@@ -244,7 +277,7 @@ These credentials are for **local development only**.
 ```bash
 cd backend
 source .venv/bin/activate
-pip install pytest pytest-asyncio aiosqlite fakeredis "psycopg[binary]"
+pip install pytest pytest-asyncio aiosqlite fakeredis
 python -m pytest -o asyncio_mode=auto
 ```
 
@@ -310,7 +343,7 @@ Please report vulnerabilities privately to the maintainers rather than opening a
 
 | Area                       | Limitation                                                                                                                                                |
 | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Dependencies**     | `requirements.txt` does not yet list SQLAlchemy, Alembic or the test tools, so they are installed separately as shown above.                            |
+| **Test setup**     | The test tools are not listed in a requirements file, and async tests need `-o asyncio_mode=auto`. |
 | **Docker**           | `docker-compose.yml` is outdated: it refers to a `frontend/` folder and an `nginx.conf` that are not in the repository. Use the manual setup above. |
 | **Generation speed** | Quiz and study-material generation depend on model throughput and can take several minutes on slow or shared hardware.                                    |
 | **Code execution**   | No sandbox is configured for learner code, so coding answers that require execution are not scored.                                                       |

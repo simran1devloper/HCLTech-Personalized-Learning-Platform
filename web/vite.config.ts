@@ -6,7 +6,8 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [vue(), tailwindcss()],
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
-  server: { port: 5173 },
+  // `npm run dev` and `npm run preview` forward the backend's paths to the local API (same paths as the rewrites in ../vercel.json)
+  server: { port: 5173, proxy: { '^/(api|auth|learning)/': 'http://localhost:8000', '^/health$': 'http://localhost:8000' } },
   build: {
     target: 'es2022',
     chunkSizeWarningLimit: 900,

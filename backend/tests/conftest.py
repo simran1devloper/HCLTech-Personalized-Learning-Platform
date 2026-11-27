@@ -12,6 +12,10 @@ os.environ["LLM_PROVIDERS"] = "ollama,gemini"   # the suite must not depend on t
 os.environ["OLLAMA_BASE_URL"] = "http://localhost:11434"
 os.environ["SUPABASE_URL"] = ""
 os.environ["SUPABASE_KEY"] = ""
+# ... and never touch the database configured in .env (for example a Supabase project)
+os.environ["DB_BACKEND"] = "sqlite"
+os.environ["STORE_BACKEND"] = "sqlite"
+os.environ["DATABASE_URL"] = ""
 
 import pytest
 from fastapi.testclient import TestClient

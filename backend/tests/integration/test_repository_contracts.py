@@ -141,6 +141,26 @@ def test_migrations_up_down_up_and_no_drift_between_revisions_and_metadata(db):
     assert current_revision(db) == HEAD
 
 
+def test_reseeding_an_already_seeded_database_needs_only_two_queries(db):
+    reg = SkillRegistry(SqlSkillRepository(db))
+    seed(reg)
+    before = (reg.repo.list(limit=999), reg.repo.list_dependencies())
+    statements = []
+    sa.event.listen(db.engine, "before_cursor_execute", lambda *a: statements.append(a[2]))
+    seed(reg)
+    assert len(statements) <= 3, statements          # skill count, skills, dependencies
+    assert (reg.repo.list(limit=999), reg.repo.list_dependencies()) == before
+
+
+def test_every_postgres_table_has_row_level_security(db):
+    if db.dialect != "postgresql":
+        pytest.skip("Row Level Security is PostgreSQL-only")
+    with db.engine.connect() as c:
+        unprotected = c.execute(sa.text("SELECT c.relname FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace "
+                                        "WHERE n.nspname = current_schema() AND c.relkind = 'r' AND NOT c.relrowsecurity")).scalars().all()
+    assert unprotected == []
+
+
 def test_postgres_rejects_dependency_cycles_in_the_database_itself(db, reg):
     if db.dialect != "postgresql":
         pytest.skip("DB-level cycle trigger is PostgreSQL-only (the application guards SQLite)")
